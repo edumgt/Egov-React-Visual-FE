@@ -1,6 +1,9 @@
 ## npm start
 ## serve -s build
 
+## SSL 오류
+## export NODE_OPTIONS=--openssl-legacy-provider
+
 ## npm run build
 
 ## Node.js     | v18.12.0 |
