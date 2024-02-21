@@ -2,7 +2,9 @@
 ## serve -s build
 
 ## SSL 오류
-## export NODE_OPTIONS=--openssl-legacy-provider
+## export NODE_OPTIONS=--openssl-legacy-provid
+
+## npm audit fix --forceer
 
 ## npm run build
 
