@@ -1,6 +1,8 @@
 ## npm start
 ## serve -s build
 
+## login admin2 / 1
+
 ## SSL 오류
 ## export NODE_OPTIONS=--openssl-legacy-provid
 
