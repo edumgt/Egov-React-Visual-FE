@@ -1,14 +1,20 @@
+## nvm 설치치
+## nvm install 18
+## nvm use 18
+## nvm ls
+
 ## npm outdated
 
 ## npm start
 ## serve -s build
 
-## login admin2 / 1
+## admin2 / 1
+## admin / 111111
 
 ## SSL 오류
 ## export NODE_OPTIONS=--openssl-legacy-provid
 
-## npm audit fix --forceer
+## npm audit fix --force
 
 ## npm run build
 
@@ -32,6 +38,6 @@ npm install
 
 ```bash
 # .env.development 예시
-REACT_APP_EGOV_CONTEXT_URL=localhost:8080
+REACT_APP_EGOV_CONTEXT_URL=localhost:8888
 ```
 
