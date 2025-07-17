@@ -1,30 +1,45 @@
 version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-northeast-2
+    AWS_ACCOUNT_ID: "086015456585"
+    IMAGE_REPO_NAME: "nodejs-test"  # ECR에 생성한 리포지토리 이름
+    GIT_CLONE_URL: "https://github.com/edumgt/egov-react-nuclear.git"
+    
+
 phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo Installing dependencies...
+      - apt-get update -y
+      - apt-get install -y git
+
   pre_build:
     commands:
-
-      - echo "Testing login password"
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION
+      - echo "Cloning Git source..."
+      - git clone $GIT_CLONE_URL $GIT_CLONE_DIR
+      - cd $GIT_CLONE_DIR
 
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
 
-
-
       - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
       - IMAGE_TAG=latest
+
   build:
     commands:
-      - echo "REPOSITORY_URI = $REPOSITORY_URI"
-      - echo "IMAGE_TAG = $IMAGE_TAG"   
       - echo Build started on `date`
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
-      
+
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Pushing the Docker images...
+      - echo Pushing the Docker image to ECR...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
+
+      - echo Writing imagedefinitions.json for ECS...
       - printf '[{"name":"poc_cont","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
