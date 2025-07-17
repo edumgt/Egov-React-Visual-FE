@@ -5,7 +5,6 @@ env:
     AWS_DEFAULT_REGION: ap-northeast-2
     AWS_ACCOUNT_ID: "086015456585"
     IMAGE_REPO_NAME: "nodejs-test"
-    GIT_CLONE_URL: "https://$GITHUB_TOKEN@github.com/edumgt/egov-react-nuclear.git"
 
 phases:
   install:
@@ -17,8 +16,9 @@ phases:
 
   pre_build:
     commands:
-      - echo "🔐 Cloning from $GIT_CLONE_URL"
-      - git clone $GIT_CLONE_URL
+      - echo "🔐 GitHub Token = ${GITHUB_TOKEN:0:4}****"
+      - CLONE_URL="https://$GITHUB_TOKEN@github.com/edumgt/egov-react-nuclear.git"
+      - git clone $CLONE_URL
       - cd egov-react-nuclear
 
       - echo Logging in to Amazon ECR...
