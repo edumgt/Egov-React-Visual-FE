@@ -1,4 +1,4 @@
-## nvm 설치치
+## nvm 설치
 ## nvm install 18
 ## nvm use 18
 ## nvm ls
@@ -43,3 +43,8 @@ REACT_APP_EGOV_CONTEXT_URL=localhost:8888
 
 ##
 docker run -it --rm --entrypoint sh egovreactnuclear
+
+
+## CodeBuild 를 통한 연동
+https://chatgpt.com/share/6878558a-6260-8007-ac40-a52d0c9d2cd8
+
