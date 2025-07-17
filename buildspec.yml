@@ -31,10 +31,18 @@ phases:
       - echo Build started on `date`
       - npm install
       - npm run build
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - cp -r dist ../app-dist  # 빌드 결과물 백업
 
   post_build:
     commands:
+      - echo Creating Nginx-based Docker image...
+      - |
+        cat <<EOF > ../Dockerfile
+        FROM nginx:alpine
+        COPY ./build /usr/share/nginx/html
+        EOF
+      - cd ..
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
       - echo Pushing image to ECR...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - printf '[{"name":"poc_cont","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
