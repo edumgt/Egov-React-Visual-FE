@@ -66,4 +66,14 @@ https://github.com/settings/tokens
 ![alt text](image-1.png)
 
 
+## final
+1. CodeBuild에서 React 프로젝트를 빌드하고 Nginx 기반 도커 이미지 생성
+2. ECR에 푸시된 이미지를 기반으로:
+2.1 EC2 인스턴스 시작
+2.2 AMI 생성
+2.3 시작 템플릿 생성
+2.4 Auto Scaling 그룹 구성
+2.5 ALB 생성 및 Auto Scaling 연결
+2.6 최종적으로 ALB 주소를 통해 2개의 EC2 인스턴스로부터 로드밸런싱되는 정적 홈페이지 제공
+
 
