@@ -135,3 +135,6 @@ https://github.com/settings/tokens
 
 ## 신뢰관계
 ![alt text](image-3.png)
+
+## 환경변수
+![alt text](image-4.png)
