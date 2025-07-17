@@ -1,5 +1,11 @@
 version: 0.2
 
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-northeast-2
+    AWS_ACCOUNT_ID: "086015456585"
+    IMAGE_REPO_NAME: "nodejs-test"
+
 phases:
   install:
     runtime-versions:
@@ -23,6 +29,8 @@ phases:
   build:
     commands:
       - echo Build started on `date`
+      - npm install
+      - npm run build
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
 
   post_build:
