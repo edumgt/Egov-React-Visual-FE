@@ -59,3 +59,11 @@ An error occurred (AccessDeniedException) when calling the GetAuthorizationToken
 aws ecr get-login-password --region ap-northeast-2 `
 | docker login --username AWS --password-stdin 086015456585.dkr.ecr.ap-northeast-2.amazonaws.com
 
+## 권한문제로 github 연동 토큰 생성
+https://github.com/settings/tokens
+
+## 토큰 생성
+![alt text](image-1.png)
+
+
+
