@@ -16,7 +16,7 @@ phases:
 
   pre_build:
     commands:
-      - echo "🔐 GitHub Token = ${GITHUB_TOKEN:0:4}****"
+      - echo "🔐 GitHub Token prefix = $(echo $GITHUB_TOKEN | cut -c1-4)****"
       - CLONE_URL="https://$GITHUB_TOKEN@github.com/edumgt/egov-react-nuclear.git"
       - git clone $CLONE_URL
       - cd egov-react-nuclear
