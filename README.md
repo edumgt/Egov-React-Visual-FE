@@ -48,3 +48,14 @@ docker run -it --rm --entrypoint sh egovreactnuclear
 ## CodeBuild 를 통한 연동
 https://chatgpt.com/share/6878558a-6260-8007-ac40-a52d0c9d2cd8
 
+## AWS CLI 로 ECR 로그인 테스트
+aws ecr get-login-password --region ap-northeast-2
+## Error
+An error occurred (AccessDeniedException) when calling the GetAuthorizationToken operation: User: arn:aws:iam::086015456585:user/DevUser0010 is not authorized to perform: ecr:GetAuthorizationToken on resource: * because no identity-based policy allows the ecr:GetAuthorizationToken action
+
+## IAM 추가
+![alt text](image.png)
+
+aws ecr get-login-password --region ap-northeast-2 `
+| docker login --username AWS --password-stdin 086015456585.dkr.ecr.ap-northeast-2.amazonaws.com
+
