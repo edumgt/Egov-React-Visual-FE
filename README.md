@@ -77,3 +77,61 @@ https://github.com/settings/tokens
 2.6 최종적으로 ALB 주소를 통해 2개의 EC2 인스턴스로부터 로드밸런싱되는 정적 홈페이지 제공
 
 
+## IAM 권한
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:logs:ap-northeast-2:086015456585:log-group:/aws/codebuild/nodejs-react-0717",
+                "arn:aws:logs:ap-northeast-2:086015456585:log-group:/aws/codebuild/nodejs-react-0717:*"
+            ],
+            "Action": [
+                "logs:*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::codepipeline-ap-northeast-2-*"
+            ],
+            "Action": [
+                "s3:*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "codebuild:*"
+            ],
+            "Resource": [
+                "arn:aws:codebuild:ap-northeast-2:086015456585:report-group/nodejs-react-0717-*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:*",
+                "elasticloadbalancing:*",
+                "autoscaling:*",
+                "iam:PassRole",
+                "logs:*",
+                "cloudwatch:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+
+![alt text](image-2.png)
+
+## 신뢰관계
+![alt text](image-3.png)
