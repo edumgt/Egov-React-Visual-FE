@@ -31,7 +31,7 @@ phases:
       - echo Build started on `date`
       - npm install
       - npm run build
-      - cp -r dist ../app-dist  # 빌드 결과물 백업
+      - cp -r dist ../build  # 빌드 결과물 백업
 
   post_build:
     commands:
