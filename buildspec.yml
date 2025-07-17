@@ -6,7 +6,7 @@ env:
     AWS_ACCOUNT_ID: "086015456585"
     IMAGE_REPO_NAME: "nodejs-test"
     INSTANCE_TYPE: "t3.micro"
-    KEY_NAME: "my-key"
+    KEY_NAME: "java-be-server"
     TG_NAME: "react-app-tg"
     ALB_NAME: "react-app-alb"
     ASG_NAME: "react-app-asg"
