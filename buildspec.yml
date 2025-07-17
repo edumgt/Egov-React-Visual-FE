@@ -31,7 +31,7 @@ phases:
       - echo Build started on `date`
       - npm install
       - npm run build
-      - cp -r dist ../build  # 빌드 결과물 백업
+      - cp -r build ../app-dist  # 빌드 결과물 백업
 
   post_build:
     commands:
@@ -39,7 +39,7 @@ phases:
       - |
         cat <<EOF > ../Dockerfile
         FROM nginx:alpine
-        COPY ./build /usr/share/nginx/html
+        COPY ./app-dist /usr/share/nginx/html
         EOF
       - cd ..
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
