@@ -20,8 +20,7 @@ phases:
   pre_build:
     commands:
       - echo "Cloning Git source..."
-      - git clone $GIT_CLONE_URL $GIT_CLONE_DIR
-      - cd $GIT_CLONE_DIR
+      - git clone $GIT_CLONE_URL
 
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
