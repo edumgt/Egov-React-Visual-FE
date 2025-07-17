@@ -41,3 +41,5 @@ npm install
 REACT_APP_EGOV_CONTEXT_URL=localhost:8888
 ```
 
+##
+docker run -it --rm --entrypoint sh egovreactnuclear
