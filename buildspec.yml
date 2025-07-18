@@ -69,8 +69,8 @@ phases:
         docker pull $REPOSITORY_URI:$IMAGE_TAG
         docker run -d -p 80:80 $REPOSITORY_URI:$IMAGE_TAG
         EOF
-      - USER_DATA_B64=$(base64 user-data.sh | tr -d '\n')
       - |
+        USER_DATA_B64=$(base64 user-data.sh | tr -d '\n')
         INSTANCE_ID=$(aws ec2 run-instances \
           --image-id ami-01b15011585ebc739 \
           --count 1 \
@@ -82,6 +82,7 @@ phases:
           --query 'Instances[0].InstanceId' --output text)
       - echo "⏳ Waiting for EC2 to enter 'running' state: $INSTANCE_ID"
       - aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+
       - sleep 30
       - |
         AMI_ID=$(aws ec2 create-image \
