@@ -54,11 +54,8 @@ phases:
   post_build:
     commands:
       - set -e
-      - echo "✅ React build 디렉터리 app-dist로 복사"
-      - cp -r egov-react-nuclear/build app-dist    # 🔁 현재 디렉터리 기준 복사
-      - echo "✅ Dockerfile 생성"
-      - echo "FROM nginx:alpine\nCOPY ./app-dist /usr/share/nginx/html" > Dockerfile
-      - echo "✅ Docker build 시작"
+      - cp -r egov-react-nuclear/build app-dist
+      - printf "FROM nginx:alpine\nCOPY ./app-dist /usr/share/nginx/html\nCOPY nginx.conf /etc/nginx/nginx.conf\n" > Dockerfile
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - |
