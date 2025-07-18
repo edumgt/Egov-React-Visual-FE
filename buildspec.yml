@@ -48,13 +48,17 @@ phases:
       - cd egov-react-nuclear
       - npm install
       - npm run build
-      - cp -r build ../app-dist
+      - cp -r build ./app-dist
       - cd ..
 
   post_build:
     commands:
       - set -e
+      - echo "✅ React build 디렉터리 app-dist로 복사"
+      - cp -r egov-react-nuclear/build app-dist    # 🔁 현재 디렉터리 기준 복사
+      - echo "✅ Dockerfile 생성"
       - echo -e "FROM nginx:alpine\nCOPY ./app-dist /usr/share/nginx/html" > Dockerfile
+      - echo "✅ Docker build 시작"
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - |
