@@ -138,3 +138,5 @@ https://github.com/settings/tokens
 
 ## 환경변수
 ![alt text](image-4.png)
+
+## 07-18 수정
