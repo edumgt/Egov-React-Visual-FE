@@ -34,7 +34,6 @@ phases:
       - export SUBNET2=$EXISTING_SUBNET2
       - export SG_ID=$EXISTING_SG_ID
       - export SUBNETS="$SUBNET1,$SUBNET2"
-      - echo "🔐 GitHub Token prefix: $(echo $GITHUB_TOKEN | cut -c1-4)****"
       - export CLONE_URL="https://$GITHUB_TOKEN@github.com/edumgt/egov-react-nuclear.git"
       - git clone $CLONE_URL
       - cd egov-react-nuclear
