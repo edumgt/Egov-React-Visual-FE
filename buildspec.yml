@@ -12,7 +12,7 @@ env:
     ASG_NAME: "react-app-asg"
     TEMPLATE_NAME: "react-app-template"
 
-    # ✅ 이미 생성된 리소스 정보
+    # ✅ 이미 생성된 리소스 ID
     EXISTING_VPC_ID: "vpc-08ab699fb2026cce6"
     EXISTING_SUBNET1: "subnet-0d181098264f54fe3"
     EXISTING_SUBNET2: "subnet-036f8e21d5c51f265"
@@ -30,22 +30,21 @@ phases:
   pre_build:
     commands:
       - set -e
-
-      - echo "✅ 재사용할 리소스 ID 확인"
+      - echo "✅ 리소스 ID 로드"
       - VPC_ID=$EXISTING_VPC_ID
       - SUBNET1=$EXISTING_SUBNET1
       - SUBNET2=$EXISTING_SUBNET2
-      - SUBNETS="$SUBNET1,$SUBNET2"
       - SG_ID=$EXISTING_SG_ID
+      - SUBNETS="$SUBNET1,$SUBNET2"
 
-      # GitHub clone & Docker login
-      - echo "🔐 GitHub Token prefix = $(echo $GITHUB_TOKEN | cut -c1-4)****"
+      # GitHub 및 ECR 로그인
+      - echo "🔐 GitHub Token prefix: $(echo $GITHUB_TOKEN | cut -c1-4)****"
       - CLONE_URL="https://$GITHUB_TOKEN@github.com/edumgt/egov-react-nuclear.git"
       - git clone $CLONE_URL
       - cd egov-react-nuclear
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - REPOSITORY_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME"
       - IMAGE_TAG=latest
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI
       - cd ..
 
   build:
@@ -70,7 +69,7 @@ phases:
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
       - docker push $REPOSITORY_URI:$IMAGE_TAG
 
-      # EC2 사용자 데이터 작성
+      # EC2 user-data.sh 생성
       - |
         cat <<EOF > user-data.sh
         #!/bin/bash
@@ -84,18 +83,36 @@ phases:
       - USER_DATA_B64=$(base64 user-data.sh | tr -d '\n')
 
       # EC2 인스턴스 실행
-      - INSTANCE_ID=$(aws ec2 run-instances --image-id ami-01b15011585ebc739 --count 1 --instance-type $INSTANCE_TYPE --key-name $KEY_NAME --security-group-ids $SG_ID --subnet-id $SUBNET1 --user-data "$USER_DATA_B64" --query 'Instances[0].InstanceId' --output text)
+      - |
+        echo "🚀 Launching EC2 instance..."
+        INSTANCE_ID=$(aws ec2 run-instances \
+          --image-id ami-01b15011585ebc739 \
+          --count 1 \
+          --instance-type $INSTANCE_TYPE \
+          --key-name $KEY_NAME \
+          --security-group-ids $SG_ID \
+          --subnet-id $SUBNET1 \
+          --user-data "$USER_DATA_B64" \
+          --query 'Instances[0].InstanceId' --output text)
 
       - echo "⏳ Waiting for EC2 to enter 'running' state: $INSTANCE_ID"
       - aws ec2 wait instance-running --instance-ids $INSTANCE_ID
-      - echo "🕓 Giving user-data time to finish (sleep 30s)..."
+      - echo "🕓 Waiting 30 seconds for user-data script execution..."
       - sleep 30
 
       # AMI 생성
-      - AMI_ID=$(aws ec2 create-image --instance-id $INSTANCE_ID --name "nginx-react-app-ami-$(date +%s)" --no-reboot --query 'ImageId' --output text)
+      - |
+        echo "📦 Creating AMI from instance..."
+        AMI_ID=$(aws ec2 create-image \
+          --instance-id $INSTANCE_ID \
+          --name "nginx-react-app-ami-$(date +%s)" \
+          --no-reboot \
+          --query 'ImageId' --output text)
 
-      # Launch Template
-      - aws ec2 create-launch-template \
+      # Launch Template 생성
+      - |
+        echo "📋 Creating Launch Template..."
+        aws ec2 create-launch-template \
           --launch-template-name $TEMPLATE_NAME \
           --version-description "v1" \
           --launch-template-data "{
@@ -105,8 +122,10 @@ phases:
             \"SecurityGroupIds\":[\"$SG_ID\"]
           }"
 
-      # Target Group
-      - TG_ARN=$(aws elbv2 create-target-group \
+      # Target Group 생성
+      - |
+        echo "🎯 Creating Target Group..."
+        TG_ARN=$(aws elbv2 create-target-group \
           --name $TG_NAME \
           --protocol HTTP \
           --port 80 \
@@ -115,23 +134,29 @@ phases:
           --query 'TargetGroups[0].TargetGroupArn' \
           --output text)
 
-      # Load Balancer
-      - ALB_ARN=$(aws elbv2 create-load-balancer \
+      # ALB 생성
+      - |
+        echo "📡 Creating Load Balancer..."
+        ALB_ARN=$(aws elbv2 create-load-balancer \
           --name $ALB_NAME \
           --subnets $SUBNET1 $SUBNET2 \
           --security-groups $SG_ID \
           --query 'LoadBalancers[0].LoadBalancerArn' \
           --output text)
 
-      # Listener
-      - aws elbv2 create-listener \
+      # Listener 생성
+      - |
+        echo "🔊 Creating Listener..."
+        aws elbv2 create-listener \
           --load-balancer-arn $ALB_ARN \
           --protocol HTTP \
           --port 80 \
           --default-actions Type=forward,TargetGroupArn=$TG_ARN
 
-      # Auto Scaling Group
-      - aws autoscaling create-auto-scaling-group \
+      # Auto Scaling Group 생성
+      - |
+        echo "📈 Creating Auto Scaling Group..."
+        aws autoscaling create-auto-scaling-group \
           --auto-scaling-group-name $ASG_NAME \
           --launch-template LaunchTemplateName=$TEMPLATE_NAME,Version=1 \
           --min-size 2 \
@@ -140,6 +165,6 @@ phases:
           --vpc-zone-identifier "$SUBNET1,$SUBNET2" \
           --target-group-arns $TG_ARN
 
-  artifacts:
-    files:
-      - imagedefinitions.json
+artifacts:
+  files:
+    - imagedefinitions.json
