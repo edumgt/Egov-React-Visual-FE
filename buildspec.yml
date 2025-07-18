@@ -48,13 +48,13 @@ phases:
       - cd egov-react-nuclear
       - npm install
       - npm run build
-      - cp -r build ./app-dist
       - cd ..
+      - cp -r egov-react-nuclear/build app-dist
+      - echo "OK" > app-dist/health.html
 
   post_build:
     commands:
       - set -e
-      - cp -r egov-react-nuclear/build app-dist
       - printf "FROM nginx:alpine\nCOPY ./app-dist /usr/share/nginx/html\nCOPY nginx.conf /etc/nginx/nginx.conf\n" > Dockerfile
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
       - docker push $REPOSITORY_URI:$IMAGE_TAG
@@ -71,7 +71,25 @@ phases:
       - aws ec2 wait instance-running --instance-ids $INSTANCE_ID
       - sleep 30
       - AMI_ID=$(aws ec2 create-image --instance-id $INSTANCE_ID --name "nginx-react-app-ami-$(date +%s)" --no-reboot --query 'ImageId' --output text)
-      - aws ec2 create-launch-template --launch-template-name $TEMPLATE_NAME --version-description "v1" --launch-template-data "{\"ImageId\":\"$AMI_ID\",\"InstanceType\":\"$INSTANCE_TYPE\",\"KeyName\":\"$KEY_NAME\",\"SecurityGroupIds\":[\"$SG_ID\"]}"
+
+      # ✅ Launch Template 존재하면 삭제 후 생성
+      - |
+        TEMPLATE_ID=$(aws ec2 describe-launch-templates \
+          --launch-template-names $TEMPLATE_NAME \
+          --query "LaunchTemplates[0].LaunchTemplateId" \
+          --output text 2>/dev/null)
+
+        if [ "$TEMPLATE_ID" != "None" ] && [ "$TEMPLATE_ID" != "null" ]; then
+          echo "⚠️ 기존 Launch Template 삭제: $TEMPLATE_ID"
+          aws ec2 delete-launch-template --launch-template-id $TEMPLATE_ID
+        fi
+
+        echo "✅ Launch Template 새로 생성"
+        aws ec2 create-launch-template \
+          --launch-template-name $TEMPLATE_NAME \
+          --version-description "v1" \
+          --launch-template-data "{\"ImageId\":\"$AMI_ID\",\"InstanceType\":\"$INSTANCE_TYPE\",\"KeyName\":\"$KEY_NAME\",\"SecurityGroupIds\":[\"$SG_ID\"]}"
+
       - TG_ARN=$(aws elbv2 create-target-group --name $TG_NAME --protocol HTTP --port 80 --target-type instance --vpc-id $VPC_ID --query 'TargetGroups[0].TargetGroupArn' --output text)
       - ALB_ARN=$(aws elbv2 create-load-balancer --name $ALB_NAME --subnets $SUBNET1 $SUBNET2 --security-groups $SG_ID --query 'LoadBalancers[0].LoadBalancerArn' --output text)
       - aws elbv2 create-listener --load-balancer-arn $ALB_ARN --protocol HTTP --port 80 --default-actions Type=forward,TargetGroupArn=$TG_ARN
