@@ -1,143 +1,148 @@
-## nvm 설치
-## nvm install 18
-## nvm use 18
-## nvm ls
+# Egov React Visual
 
-## npm outdated
+전자정부프레임워크 샘플 홈페이지 Frontend(React) 프로젝트입니다. 이 문서는 **이 저장소의 실제 구성 파일 기준**으로 기술 스택을 상세하게 정리합니다.
 
-## npm start
-## serve -s build
+---
 
-## admin2 / 1
-## admin / 111111
+## 1) 핵심 기술 스택
 
-## SSL 오류
-## export NODE_OPTIONS=--openssl-legacy-provid
+### 런타임 / 언어
+- **Node.js 18 계열 권장** (로컬 개발 가이드 기준)
+- **npm 8 계열**
+- **JavaScript (ES6+) + JSX**
 
-## npm audit fix --force
+### 프론트엔드 프레임워크
+- **React 18** (`react`, `react-dom`)
+- **Create React App 기반 빌드 체계** (`react-scripts`)
+- **React Router v6** (`react-router-dom`) 기반 라우팅
 
-## npm run build
+### UI / 스타일링
+- **MUI(Material UI)**: `@mui/material`, `@mui/x-data-grid`
+- **Emotion**: `@emotion/react`, `@emotion/styled`
+- **styled-components**
+- 프로젝트 자체 CSS: `src/css/base.css`, `layout.css`, `component.css`, `page.css`, `response.css`
 
-## Node.js     | v18.12.0 |
-## NPM         | v8.19.2  |
+### 데이터 통신 / 유틸
+- **axios** 기반 API 통신
+- **qs** (쿼리스트링 처리)
+- **nanoid** (고유 ID 생성)
 
-## BackEnd 구동
+### 시각화 / 사용자 기능 라이브러리
+- **ApexCharts**: `apexcharts`, `react-apexcharts`
+- **Google Charts**: `react-google-charts`
+- **Pie Chart**: `react-minimal-pie-chart`
+- **Date Picker**: `react-datepicker`
+- **Modal**: `react-modal`, `react-modal-image`
+- **Toast 알림**: `react-toastify`
+- **Excel 처리**: `xlsx`
+- **아이콘**: Font Awesome React 바인딩
 
-[심플 홈페이지 Backend](https://github.com/eGovFramework/egovframe-template-simple-backend.git) 소스를 받아 구동한다.
+### 테스트
+- CRA 기본 테스트 스택
+  - `@testing-library/react`
+  - `@testing-library/jest-dom`
+  - `@testing-library/user-event`
 
-## FrontEnd 구동
+---
 
-# node modules를 설치해 준다.
-npm install
-```
+## 2) 애플리케이션 구조
 
-### 2. 백엔드 프로젝트 설정
+- `src/pages`: 도메인별 화면(about/intro/inform/support/admin/login/main)
+- `src/components`: 재사용 UI 컴포넌트
+- `src/routes/index.jsx`: 라우트 정의
+- `src/api/egovFetch.js`: API 호출 유틸
+- `src/config/index.js`, `src/constants/*`: 환경/상수 관리
+- `src/utils/*`: 공통 유틸리티
 
-구동된 BackEnd 서버의 URL을 본 어플리케이션의 .env.development 파일의 REACT_APP_EGOV_CONTEXT_URL에 설정해 준다.
-(단, 개발환경에서는 사용하는 환경변수 정보는 .env.development, build 시 사용하는 환경변수는 .env.production 에 기입해 준다.)
+즉, **페이지 단위 + 공통 컴포넌트 + API/유틸 분리형 구조**를 따릅니다.
+
+---
+
+## 3) 빌드/실행 스크립트
+
+`package.json` 기준:
+
+- `npm start`: 개발 서버 실행  
+  (`react-scripts --openssl-legacy-provider start`)
+- `npm run build`: 프로덕션 빌드  
+  (`react-scripts --openssl-legacy-provider build`)
+- `npm test`: 테스트 실행
+- `npm run eject`: CRA 설정 추출
+
+> OpenSSL 호환 이슈를 고려해 `--openssl-legacy-provider` 옵션을 사용합니다.
+
+---
+
+## 4) 배포/인프라 스택
+
+### 컨테이너
+- `Dockerfile` 존재 (Node 기반 이미지 확인용)
+- 실제 서비스 정적 서빙은 **Nginx 기반 구성**을 사용
+
+### 웹서버
+- `nginx.conf`에서:
+  - `/health` 헬스체크 엔드포인트 제공
+  - `try_files $uri /index.html;`로 SPA 라우팅 지원
+
+### CI/CD
+- AWS CodeBuild 스펙 파일:
+  - `buildspec-init.yml`
+  - `buildspec-build.yml`
+  - `buildspec.yml`
+- 파이프라인 시나리오(파일 내용 기준):
+  1. React 빌드 산출물 생성
+  2. Nginx 이미지 빌드
+  3. Amazon ECR 푸시
+  4. EC2/AMI/Launch Template/ASG/ALB 구성 자동화
+
+즉, 이 저장소는 **프론트 React 앱 + Nginx 정적 배포 + AWS 인프라 자동화(CodeBuild 중심)** 조합의 기술 스택을 갖습니다.
+
+---
+
+## 5) 백엔드 연동
+
+이 프로젝트는 eGovFramework 샘플 백엔드와 연동하도록 설계되어 있습니다.
+
+- 백엔드 저장소:  
+  https://github.com/eGovFramework/egovframe-template-simple-backend.git
+
+개발 환경에서는 `.env.development`의 API 서버 주소를 사용하고,
+배포 빌드는 `.env.production` 값을 사용합니다.
+
+예시:
 
 ```bash
-# .env.development 예시
 REACT_APP_EGOV_CONTEXT_URL=localhost:8888
 ```
 
-##
-docker run -it --rm --entrypoint sh egovreactnuclear
+또한 `package.json`에는 로컬 프록시(`http://localhost:8888`)가 설정되어 있습니다.
 
+---
 
-## CodeBuild 를 통한 연동
-https://chatgpt.com/share/6878558a-6260-8007-ac40-a52d0c9d2cd8
+## 6) 로컬 실행 빠른 시작
 
-## AWS CLI 로 ECR 로그인 테스트
-aws ecr get-login-password --region ap-northeast-2
-## Error
-An error occurred (AccessDeniedException) when calling the GetAuthorizationToken operation: User: arn:aws:iam::086015456585:user/DevUser0010 is not authorized to perform: ecr:GetAuthorizationToken on resource: * because no identity-based policy allows the ecr:GetAuthorizationToken action
+```bash
+# 1) Node 버전 맞추기
+nvm install 18
+nvm use 18
 
-## IAM 추가
-![alt text](image.png)
+# 2) 의존성 설치
+npm install
 
-aws ecr get-login-password --region ap-northeast-2 `
-| docker login --username AWS --password-stdin 086015456585.dkr.ecr.ap-northeast-2.amazonaws.com
+# 3) 개발 서버 실행
+npm start
+```
 
-## 권한문제로 github 연동 토큰 생성
-https://github.com/settings/tokens
+프로덕션 확인:
 
-## 토큰 생성
-![alt text](image-1.png)
+```bash
+npm run build
+serve -s build
+```
 
+---
 
-## final
-1. CodeBuild에서 React 프로젝트를 빌드하고 Nginx 기반 도커 이미지 생성
-2. ECR에 푸시된 이미지를 기반으로:
-2.1 EC2 인스턴스 시작
-2.2 AMI 생성
-2.3 시작 템플릿 생성
-2.4 Auto Scaling 그룹 구성
-2.5 ALB 생성 및 Auto Scaling 연결
-2.6 최종적으로 ALB 주소를 통해 2개의 EC2 인스턴스로부터 로드밸런싱되는 정적 홈페이지 제공
+## 7) 한 줄 요약
 
-
-## IAM 권한
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Resource": [
-                "arn:aws:logs:ap-northeast-2:086015456585:log-group:/aws/codebuild/nodejs-react-0717",
-                "arn:aws:logs:ap-northeast-2:086015456585:log-group:/aws/codebuild/nodejs-react-0717:*"
-            ],
-            "Action": [
-                "logs:*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Resource": [
-                "arn:aws:s3:::codepipeline-ap-northeast-2-*"
-            ],
-            "Action": [
-                "s3:*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "codebuild:*"
-            ],
-            "Resource": [
-                "arn:aws:codebuild:ap-northeast-2:086015456585:report-group/nodejs-react-0717-*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ecr:*"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:*",
-                "elasticloadbalancing:*",
-                "autoscaling:*",
-                "iam:PassRole",
-                "logs:*",
-                "cloudwatch:*"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-
-![alt text](image-2.png)
-
-## 신뢰관계
-![alt text](image-3.png)
-
-## 환경변수
-![alt text](image-4.png)
-
-## 07-18 수정
-##
+이 레포는 **React 18 + CRA + MUI/Emotion + Chart/Excel 생태계**를 중심으로 구성된 SPA이며,
+**Nginx 정적 서빙과 AWS(CodeBuild/ECR/EC2/ASG/ALB) 자동 배포**까지 고려한 프론트엔드 프로젝트입니다.
