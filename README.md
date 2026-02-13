@@ -103,8 +103,10 @@
 
 이 프로젝트는 eGovFramework 샘플 백엔드와 연동하도록 설계되어 있습니다.
 
+
 - 백엔드 저장소:  
-  https://github.com/eGovFramework/egovframe-template-simple-backend.git
+  https://github.com/edumgt/Egov-Spring-Visual-BE
+
 
 개발 환경에서는 `.env.development`의 API 서버 주소를 사용하고,
 배포 빌드는 `.env.production` 값을 사용합니다.
@@ -122,14 +124,7 @@ REACT_APP_EGOV_CONTEXT_URL=localhost:8888
 ## 6) 로컬 실행 빠른 시작
 
 ```bash
-# 1) Node 버전 맞추기
-nvm install 18
-nvm use 18
-
-# 2) 의존성 설치
 npm install
-
-# 3) 개발 서버 실행
 npm start
 ```
 
